@@ -97,16 +97,18 @@ var connector = function connector() {
   var _mapState = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultMapState;
 
   var mapDispatch = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultMapDispatch;
+
+  var _store = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+
   return function (component) {
     var mapState = normalizeMapState(_mapState);
 
     return {
       name: 'connect-' + component.name,
       mixins: [component],
-      inject: ['$$store'],
 
       data: function data() {
-        var merged = _extends({}, mapState(this.$$store.getState(), this.$props || {}), redux.bindActionCreators(mapDispatch, this.$$store.dispatch));
+        var merged = _extends({}, mapState(_store.getState(), this.$props || {}), redux.bindActionCreators(mapDispatch, _store.dispatch));
 
         return Object.keys(merged).reduce(function (data, key) {
           return _extends({}, data, _defineProperty({}, key, merged[key]));
@@ -132,7 +134,7 @@ var connector = function connector() {
           });
         };
 
-        this._unsubscribe = observeStore(this.$$store, getMappedState, function (newState, oldState) {
+        this._unsubscribe = observeStore(_store, getMappedState, function (newState, oldState) {
           Object.keys(newState).forEach(function (key) {
             _this.$set(_this, key, newState[key]);
           });
